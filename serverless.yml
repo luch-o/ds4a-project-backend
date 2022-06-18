@@ -2,10 +2,22 @@ service: suicides-app
 
 frameworkVersion: '3'
 
+custom:
+  datalakeBucket: ds4a-co6-t107-datalake
+
 provider:
   name: aws
   region: us-east-1
   runtime: python3.8
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Resource: arn:aws:s3:::${self:custom.datalakeBucket}/*
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
 
 package:
   patterns:
@@ -23,8 +35,8 @@ functions:
         - src/parquetize.py
     events:
       - s3:
-        bucket: ds4a-co6-t107-datalake
-        event: s3:ObjectCreated:*
-        rules:
-          prefix: cleaned/
-          suffix: .csv
+          bucket: ${self:custom.datalakeBucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: cleaned/
+            - suffix: .csv
