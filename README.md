@@ -8,7 +8,7 @@ DS4A Colombia - Cohort 6 - Team 107
   - Cristian David Lavacude Galvis
   - Jorge Martinez
   - Andres Montañez
-  - William Obando
+  - William Oquendo
   - Luis Carlos Rodriguez
   - Darwin Pico
 
