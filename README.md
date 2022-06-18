@@ -9,7 +9,7 @@ DS4A Colombia - Cohort 6 - Team 107
   - Jorge Martinez
   - Andres Montañez
   - William Obando
-  - Luis Caros Rodriguez
+  - Luis Carlos Rodriguez
   - Darwin Pico
 
 ## Dependencies
