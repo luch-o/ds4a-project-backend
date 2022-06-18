@@ -1,0 +1,30 @@
+service: suicides-app
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.8
+
+package:
+  patterns:
+  - '!**'
+  individually: true
+
+resources:
+
+
+functions:
+  parquetize:
+    handler: src.parquetize.handler
+    package:
+      patterns:
+        - src/parquetize.py
+    events:
+      - s3:
+        bucket: ds4a-co6-t107-datalake
+        event: s3:ObjectCreated:*
+        rules:
+          prefix: cleaned/
+          suffix: .csv
