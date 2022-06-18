@@ -24,15 +24,23 @@ package:
   - '!**'
   individually: true
 
-resources:
-
+layers:
+  pandas:
+    path: src/libs/pandas
+    package:
+      patterns: 
+        - "**/**"
+    description: "Includes pandas and pyarrow"
 
 functions:
   parquetize:
-    handler: src.parquetize.handler
+    handler: src/parquetize.handler
+    timeout: 900 # 15 min, max timeout
     package:
       patterns:
         - src/parquetize.py
+    layers:
+      - !Ref PandasLambdaLayer
     events:
       - s3:
           bucket: ${self:custom.datalakeBucket}

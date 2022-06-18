@@ -111,3 +111,9 @@ node_modules
 
 # IntelliJ
 .idea/
+
+# lambda dependencies
+src/libs
+
+# data files
+data/
