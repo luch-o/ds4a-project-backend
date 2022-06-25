@@ -4,6 +4,7 @@ frameworkVersion: '3'
 
 custom:
   datalakeBucket: ds4a-co6-t107-datalake
+  secret-name: ${self:service}-${sls:stage}-db-connection-secret
 
 provider:
   name: aws
@@ -18,6 +19,9 @@ provider:
             - s3:GetObject
             - s3:PutObject
             - s3:DeleteObject
+        - Effect: Allow
+          Resource: arn:aws:secretsmanager:${aws:region}:${aws:accountId}:secret:${self:custom.secret-name}/*
+          Action: secretsmanager:GetSecretValue
 
 package:
   patterns:
@@ -31,6 +35,12 @@ layers:
       patterns: 
         - "**/**"
     description: "Includes pandas and pyarrow"
+  database:
+    path: src/libs/database
+    package:
+      patterns: 
+        - "**/**"
+    description: "Includes psycopg2"
 
 resources:
   Resources:
@@ -38,13 +48,25 @@ resources:
     RDSSecret:
       Type: "AWS::SecretsManager::Secret"
       Properties:
-        Name: ${self:service}-${sls:stage}-db-connection-secret
+        Name: ${self:custom.secret-name}
         Description: "This is a Secrets Manager secret for an RDS DB instance"
         GenerateSecretString:
           SecretStringTemplate: '{"username": "ds4auser"}'
           GenerateStringKey: "password"
           PasswordLength: 16
           ExcludeCharacters: '"@/\'
+
+    # Security group to allow access to db port
+    DBSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Allow access to RDS PostgreSQL database
+        GroupName: ${self:service}-postgres-sg
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 5432
+            ToPort: 5432
+            CidrIp: 0.0.0.0/0
 
     # This is an RDS instance resource. The master username and password use dynamic references
     # to resolve values from Secrets Manager. The dynamic reference guarantees that CloudFormation
@@ -56,10 +78,13 @@ resources:
         AllocatedStorage: 20
         DBInstanceClass: db.t4g.micro
         Engine: postgres
+        DBName: project
         MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:username}}' ]]
         MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:password}}' ]]
         BackupRetentionPeriod: 0
         DBInstanceIdentifier: ${self:service}-${sls:stage}-db-instance
+        VPCSecurityGroups:
+          - !GetAtt DBSecurityGroup.GroupId
 
     #This is a SecretTargetAttachment resource which updates the referenced Secret resource with properties about
     #the referenced RDS instance
@@ -68,7 +93,7 @@ resources:
       Properties:
         SecretId: !Ref RDSSecret
         TargetId: !Ref RDSInstance
-        TargetType: AWS::RDS::DBInstance        
+        TargetType: AWS::RDS::DBInstance
 
 functions:
   parquetize:
@@ -84,5 +109,28 @@ functions:
           bucket: ${self:custom.datalakeBucket}
           event: s3:ObjectCreated:*
           rules:
-            - prefix: cleaned/
+            - prefix: preprocessed/
             - suffix: .csv
+  
+  ingest:
+    handler: src/ingest.handler
+    timeout: 900 # 15 min, max timeout
+    package:
+      patterns:
+        - src/ingest.py
+        - src/tables.py
+    layers:
+      - !Ref PandasLambdaLayer
+      - !Ref DatabaseLambdaLayer
+    environment:
+      SECRET_NAME: !Ref RDSSecret
+    events:
+      - s3:
+          bucket: ${self:custom.datalakeBucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: parquetized/
+            - suffix: .parquet
+
+    get-data:
+    

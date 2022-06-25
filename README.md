@@ -17,5 +17,6 @@ DS4A Colombia - Cohort 6 - Team 107
 Dependencies of the `parquetize` lambda function are not included in the repository. In order to download them and enable serverless framework to create the lambda layer use the following command:
 
 ```bash
-$ pip install -t src/libs/pandas/python -r aws_requirements.txt
+$ pip install -t src/libs/pandas/python -r pandas_requirements.txt
+$ pip install -t src/libs/database/python -r database_requirements.txt
 ```

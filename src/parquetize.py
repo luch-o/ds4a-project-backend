@@ -28,7 +28,7 @@ def handler(event, context):
         csv_bytes = s3.get_object(Bucket=bucket, Key=key).get("Body")
         df = pd.read_csv(csv_bytes)
 
-        pq_key = key.replace("cleaned", "parquet").replace("csv", "parquet")
+        pq_key = key.replace("preprocessed", "parquetized").replace("csv", "parquet")
         with io.BytesIO() as pq_buffer:
             df.to_parquet(pq_buffer, index=False)
             s3.put_object(Bucket=bucket, Key=pq_key, Body=pq_buffer.getvalue())
