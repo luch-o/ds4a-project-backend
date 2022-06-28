@@ -42,20 +42,24 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 # handler
-def lambda_handler(event, context):
+def handler(event, context):
     for record in event["Records"]:
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]
         
         filename_prefix = key.split("/")[-1].split("_")[0]
         tables = TABLES_DICT.get(filename_prefix)
+        print(f"Processing {filename_prefix}")
 
         if tables:        
             obj_bytes = s3.get_object(Bucket=bucket, Key=key).get("Body")
             df = pd.read_parquet(obj_bytes)
 
             for table in tables:
+                print(f"Ingesing data into {table.name}")
                 table.create_table(cur, conn)
                 table.insert_data(df, cur, conn)
+    
+    print("Data ingestion succesfull")
 
     return {"status": 200}

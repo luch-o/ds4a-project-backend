@@ -5,6 +5,7 @@ from psycopg2.extensions import cursor, connection
 
 
 class BaseTable:
+    name: str
     create_statement: str
     insert_statement: str
 
@@ -36,14 +37,16 @@ class BaseTable:
 
 
 class Departments(BaseTable):
-    create_statement: str = """--sql
+    name = "Departments"
+
+    create_statement = """--sql
     CREATE TABLE IF NOT EXISTS departments (
         code INTEGER PRIMARY KEY,
         name VARCHAR(30) NOT NULL
     )
     """
 
-    insert_statement: str = """--sql
+    insert_statement = """--sql
     INSERT INTO departments (
         code, name
     )
@@ -55,7 +58,9 @@ class Departments(BaseTable):
 
 
 class DepartmentsPopulationHistory(BaseTable):
-    create_statement: str = """--sql
+    name = "DepartmentsPopulationHistory"
+
+    create_statement = """--sql
     CREATE TABLE IF NOT EXISTS departmentsPopulationHistory (
         id SERIAL PRIMARY KEY,
         year INTEGER,
@@ -65,7 +70,7 @@ class DepartmentsPopulationHistory(BaseTable):
     )
     """
 
-    insert_statement: str = """--sql
+    insert_statement = """--sql
     INSERT INTO departmentsPopulationHistory (
         year, women, men, department_id
     )
@@ -77,6 +82,8 @@ class DepartmentsPopulationHistory(BaseTable):
 
 
 class Municipalies(BaseTable):
+    name = "Municipalies"
+
     create_statement: str = """--sql
     CREATE TABLE IF NOT EXISTS municipalities (
         code INTEGER PRIMARY KEY,
@@ -97,6 +104,8 @@ class Municipalies(BaseTable):
 
 
 class MunicipalityPopulationHistory(BaseTable):
+    name = "MunicipalityPopulationHistory"
+
     create_statement: str = """--sql
     CREATE TABLE IF NOT EXISTS municipalityPopulationHistory (
         id SERIAL PRIMARY KEY,

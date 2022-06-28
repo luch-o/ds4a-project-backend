@@ -20,7 +20,7 @@ provider:
             - s3:PutObject
             - s3:DeleteObject
         - Effect: Allow
-          Resource: arn:aws:secretsmanager:${aws:region}:${aws:accountId}:secret:${self:custom.secret-name}/*
+          Resource: !Ref RDSSecret
           Action: secretsmanager:GetSecretValue
 
 package:

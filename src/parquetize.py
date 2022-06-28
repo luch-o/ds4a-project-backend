@@ -3,6 +3,8 @@ import json
 import boto3
 import pandas as pd
 
+SEMICOLON_FILES = {"department", "municipality"}
+
 
 def sizeof_fmt(num, suffix="B"):
     """
@@ -23,10 +25,13 @@ def handler(event, context):
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]
         size = record["s3"]["object"]["size"]
+        filename_prefix = key.split("/")[-1].split("_")[0]
 
         print(f"Loading s3://{bucket}/{key} of size {sizeof_fmt(size)} bytes")
         csv_bytes = s3.get_object(Bucket=bucket, Key=key).get("Body")
-        df = pd.read_csv(csv_bytes)
+        df = pd.read_csv(
+            csv_bytes, sep=";" if filename_prefix in SEMICOLON_FILES else ","
+        )
 
         pq_key = key.replace("preprocessed", "parquetized").replace("csv", "parquet")
         with io.BytesIO() as pq_buffer:

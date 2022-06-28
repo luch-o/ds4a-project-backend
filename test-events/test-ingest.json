@@ -27,7 +27,7 @@
             "arn": "arn:aws:s3:::example-bucket"
           },
           "object": {
-            "key": "cleaned/Suicidios-2016-2019.csv",
+            "key": "parquetized/department_population_2016_2022.parquet",
             "size": 560932,
             "eTag": "0123456789abcdef0123456789abcdef",
             "sequencer": "0A1B2C3D4E5F678901"
