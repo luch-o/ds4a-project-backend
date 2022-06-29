@@ -1,3 +1,4 @@
+import io
 import os
 import json
 import boto3
@@ -8,7 +9,7 @@ from src.tables import (
     BaseTable,
     Departments,
     DepartmentsPopulationHistory,
-    Municipalies,
+    Municipalities,
     MunicipalityPopulationHistory,
 )
 
@@ -16,8 +17,8 @@ from src.tables import (
 
 SECRET_NAME = os.environ["SECRET_NAME"]
 TABLES_DICT: Dict[str, List[BaseTable]] = {
-    "departments": [Departments, DepartmentsPopulationHistory],
-    "municipalities": [Municipalies, MunicipalityPopulationHistory]
+    "department": [Departments, DepartmentsPopulationHistory],
+    "municipality": [Municipalities, MunicipalityPopulationHistory]
 }
 
 # functions
@@ -31,7 +32,7 @@ def get_secret(aws: boto3.Session, secret_name: str) -> Dict[str, str]:
 # intialization
 
 aws = boto3.Session()
-s3 = aws.client("s3")
+s3 = aws.resource("s3")
 db_secret = get_secret(aws, SECRET_NAME)
 conn = psycopg2.connect(
     host=db_secret["host"],
@@ -49,11 +50,13 @@ def handler(event, context):
         
         filename_prefix = key.split("/")[-1].split("_")[0]
         tables = TABLES_DICT.get(filename_prefix)
-        print(f"Processing {filename_prefix}")
+        print(f"Processing {filename_prefix} ({key})")
 
-        if tables:        
-            obj_bytes = s3.get_object(Bucket=bucket, Key=key).get("Body")
-            df = pd.read_parquet(obj_bytes)
+        if tables:
+            buffer = io.BytesIO()        
+            s3_obj = s3.Object(bucket, key)
+            s3_obj.download_fileobj(buffer)
+            df = pd.read_parquet(buffer)
 
             for table in tables:
                 print(f"Ingesing data into {table.name}")

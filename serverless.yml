@@ -16,6 +16,7 @@ provider:
         - Effect: Allow
           Resource: arn:aws:s3:::${self:custom.datalakeBucket}/*
           Action:
+            - s3:HeadObject
             - s3:GetObject
             - s3:PutObject
             - s3:DeleteObject

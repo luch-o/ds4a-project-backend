@@ -10,7 +10,7 @@ class BaseTable:
     insert_statement: str
 
     @classmethod
-    def prepare_data(cls, df: pd.DataFrame) -> np.ndarray:
+    def prepare_data(cls, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError()
 
     @classmethod
@@ -27,9 +27,10 @@ class BaseTable:
     @classmethod
     def insert_data(cls, df: pd.DataFrame, cur: cursor, conn: connection):
         data = cls.prepare_data(df)
+        rows = [list(row) for row in data.itertuples(index=False)]
 
         try:
-            execute_batch(cur, cls.insert_statement, data)
+            execute_batch(cur, cls.insert_statement, rows)
             conn.commit()
         except Exception as e:
             conn.rollback()
@@ -54,7 +55,7 @@ class Departments(BaseTable):
     """
 
     def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
-        return df[["DP", "DPNOM"]].drop_duplicates().to_numpy()
+        return df[["DP", "DPNOM"]].drop_duplicates()
 
 
 class DepartmentsPopulationHistory(BaseTable):
@@ -77,12 +78,12 @@ class DepartmentsPopulationHistory(BaseTable):
     VALUES (%s, %s, %s, %s)
     """
 
-    def prepare_data(df: pd.DataFrame) -> np.ndarray:
-        return df[["AÑO", "Total Mujeres", "Total Hombres", "DP"]].to_numpy()
+    def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
+        return df[["AÑO", "Total Mujeres", "Total Hombres", "DP"]]
 
 
-class Municipalies(BaseTable):
-    name = "Municipalies"
+class Municipalities(BaseTable):
+    name = "Municipalities"
 
     create_statement: str = """--sql
     CREATE TABLE IF NOT EXISTS municipalities (
@@ -99,8 +100,12 @@ class Municipalies(BaseTable):
     VALUES (%s, %s, %s)
     """
 
-    def prepare_data(df: pd.DataFrame) -> np.ndarray:
-        return df[["COD_MUNICIPIO", "MPNOM", "DP"]].drop_duplicates().to_numpy()
+    def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
+        return (
+            df[["COD_MUNICIPIO", "MPNOM", "DP"]]
+            .replace({"Barrancominas (CD)": "Barrancominas"})
+            .drop_duplicates()
+        )
 
 
 class MunicipalityPopulationHistory(BaseTable):
@@ -111,7 +116,7 @@ class MunicipalityPopulationHistory(BaseTable):
         id SERIAL PRIMARY KEY,
         year INTEGER,
         total INTEGER,
-        municipality_id INTEGER REFERENCES municipality(code)
+        municipality_id INTEGER REFERENCES municipalities(code)
     )
     """
 
@@ -123,7 +128,7 @@ class MunicipalityPopulationHistory(BaseTable):
     """
 
     def prepare_data(df: pd.DataFrame) -> np.ndarray:
-        return df[["AÑO", "Total", "COD_MUNICIPIO"]].to_numpy()
+        return df[["AÑO", "Total", "COD_MUNICIPIO"]]
 
 
 class WeaponMeans(BaseTable):

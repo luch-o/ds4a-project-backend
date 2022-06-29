@@ -27,7 +27,7 @@
             "arn": "arn:aws:s3:::example-bucket"
           },
           "object": {
-            "key": "preprocessed/department_population_2016_2022.csv",
+            "key": "preprocessed/municipality_population_2016_2022.csv",
             "size": 560932,
             "eTag": "0123456789abcdef0123456789abcdef",
             "sequencer": "0A1B2C3D4E5F678901"
