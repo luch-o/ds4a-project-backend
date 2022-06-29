@@ -36,12 +36,20 @@ layers:
       patterns: 
         - "**/**"
     description: "Includes pandas and pyarrow"
+
   database:
     path: src/libs/database
     package:
       patterns: 
         - "**/**"
     description: "Includes psycopg2"
+  
+  fastapi:
+    path: src/libs/fastapi
+    package:
+      patterns:
+        - "**/**"
+    description: "FastAPI dependencies"
 
 resources:
   Resources:
@@ -133,5 +141,15 @@ functions:
             - prefix: parquetized/
             - suffix: .parquet
 
-    get-data:
+  api:
+    handler: src/api.main.handler
+    timeout: 30
+    package:
+      patterns:
+        - src/api/*
+    layers:
+      - !Ref FastapiLambdaLayer
+    events:
+      - httpApi: '*' 
+
     

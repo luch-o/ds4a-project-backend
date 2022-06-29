@@ -19,4 +19,5 @@ Dependencies of the `parquetize` lambda function are not included in the reposit
 ```bash
 $ pip install -t src/libs/pandas/python -r pandas_requirements.txt
 $ pip install -t src/libs/database/python -r database_requirements.txt
+$ pip install -t src/libs/fastapi/python -r fastapi_requirements.txt
 ```
