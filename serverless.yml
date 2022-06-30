@@ -141,15 +141,17 @@ functions:
             - prefix: parquetized/
             - suffix: .parquet
 
-  api:
+  data-api:
     handler: src/api.main.handler
     timeout: 30
     package:
       patterns:
         - src/api/*
+        - src/__init__.py
     layers:
       - !Ref FastapiLambdaLayer
+      - !Ref DatabaseLambdaLayer
+    environment:
+      SECRET_NAME: !Ref RDSSecret
     events:
-      - httpApi: '*' 
-
-    
+      - httpApi: "*"
