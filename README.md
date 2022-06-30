@@ -14,7 +14,7 @@ DS4A Colombia - Cohort 6 - Team 107
 
 ## Dependencies
 
-Dependencies of the `parquetize` lambda function are not included in the repository. In order to download them and enable serverless framework to create the lambda layer use the following command:
+Dependencies of the lambda functions are not included in the repository. In order to download them and enable serverless framework to create the lambda layers use the following commands:
 
 ```bash
 $ pip install -t src/libs/pandas/python -r pandas_requirements.txt
