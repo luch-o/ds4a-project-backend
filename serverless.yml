@@ -154,6 +154,6 @@ functions:
     environment:
       SECRET_NAME: !Ref RDSSecret
     events:
-      - httpApi: 
-          method: "*"
-          path: "/data"
+      - httpApi:
+          method: any
+          path: /data/{proxy+}

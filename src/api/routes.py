@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Query
 from src.api.queries import (
     conn,
     get_tables,
@@ -27,7 +27,7 @@ async def departments():
 
 @router.get("/departments_population", tags=["departments"])
 async def departments_population(
-    year: int = Path(
+    year: int = Query(
         title="The year to get departmets population from", ge=2016, le=2022
     )
 ):
@@ -44,7 +44,7 @@ async def municipalities():
 
 @router.get("/municipalities_population")
 async def municipalities_population(
-    year: int = Path(
+    year: int = Query(
         title="The year to get departmets population from", ge=2016, le=2022
     )
 ):
