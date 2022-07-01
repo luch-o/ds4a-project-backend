@@ -1,6 +1,22 @@
+import os
+import boto3
 from typing import List, Dict, Union
+from src.api.utils import get_secret
+import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2.extensions import connection
+
+
+SECRET_NAME = os.environ["SECRET_NAME"]
+
+aws = boto3.Session()
+db_secret = get_secret(aws, SECRET_NAME)
+conn = psycopg2.connect(
+    host=db_secret["host"],
+    database=db_secret["dbname"],
+    user=db_secret["username"],
+    password=db_secret["password"],
+)
 
 
 def query_db(conn: connection, query: str, values: List=None) -> List[Dict]:

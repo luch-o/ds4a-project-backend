@@ -1,5 +1,5 @@
-import boto3
 import json
+import boto3
 from typing import Dict
 
 def get_secret(aws: boto3.Session, secret_name: str) -> Dict[str, str]:
