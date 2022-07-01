@@ -1,7 +1,7 @@
 import os
 import boto3
 import psycopg2
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 from mangum import Mangum
 from src.api.utils import get_secret
 from src.api.queries import get_tables, list_departments, get_departments_population
@@ -43,7 +43,7 @@ async def municipalities():
 
 
 @app.get("/departments_population")
-async def departments_population(year: int):
+async def departments_population(year: int = Path(ge=2016, le=2022)):
     """
     Returns population of every department for a given year
     """
@@ -51,7 +51,7 @@ async def departments_population(year: int):
 
 
 @app.get("/municipalities_population")
-async def municipalities_population(year: int):
+async def municipalities_population(year: int = Path(ge=2016, le=2022)):
     return {
         "message": "Endpoint to return the population of each municipality in a given year",
         "year": year,
