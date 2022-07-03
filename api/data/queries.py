@@ -104,8 +104,10 @@ def get_municipalities_population(conn: connection, department_id: int, year: in
 def get_interfamily_violence_cases(conn: connection, year: int):
     query = """--sql
     SELECT 
-        m.name as name,
-        m.code as code,
+        m.name as municipality_name,
+        m.code as municipality_code,
+        d.name as department_name,
+        d.code as department_code,
         mph.total as population,
         iv.count as violence_cases,
         CASE
@@ -119,6 +121,8 @@ def get_interfamily_violence_cases(conn: connection, year: int):
     FROM interfamilyViolence iv
     JOIN municipalities m 
         ON iv.municipality_id = m.code
+    JOIN departments d
+        ON m.department_id = d.code
     JOIN municipalityPopulationHistory mph 
         ON iv.municipality_id = mph.municipality_id AND iv.year = mph.year
     WHERE iv.year = %s
@@ -129,8 +133,10 @@ def get_interfamily_violence_cases(conn: connection, year: int):
 def get_suicide_cases(conn: connection, year:int):
     query = """--sql
     SELECT 
-        m.name as name,
-        m.code as code,
+        m.name as municipality_name,
+        m.code as municipality_code,
+        d.name as department_name,
+        d.code as department_code,
         mph.total as population,
         s.count as suicides,
         CASE
@@ -144,6 +150,8 @@ def get_suicide_cases(conn: connection, year:int):
     FROM suicides s
     JOIN municipalities m 
         ON s.municipality_id = m.code
+    JOIN departments d
+        ON m.department_id = d.code
     JOIN municipalityPopulationHistory mph 
         ON s.municipality_id = mph.municipality_id AND s.year = mph.year
     WHERE s.year = %s
@@ -154,8 +162,10 @@ def get_suicide_cases(conn: connection, year:int):
 def get_suicide_attempts(conn: connection, year:int):
     query = """--sql
     SELECT 
-        m.name as name,
-        m.code as code,
+        m.name as municipality_name,
+        m.code as municipality_code,
+        d.name as department_name,
+        d.code as department_code,
         mph.total as population,
         sum(sa.count) as suicide_attempts,
         CASE
@@ -167,13 +177,19 @@ def get_suicide_attempts(conn: connection, year:int):
             ELSE m.longitude
         END AS longitude
     FROM suicideAttempts sa
-    JOIN municipalities m 
+    JOIN municipalities m
         ON sa.municipality_id = m.code
+    JOIN departments d
+        ON m.department_id = d.code
     JOIN municipalityPopulationHistory mph 
         ON sa.municipality_id = mph.municipality_id AND sa.year = mph.year
-    WHERE sa.year = 2016
-    GROUP BY 
-        name, code, population
+    WHERE sa.year = %s
+    GROUP BY
+        municipality_name,
+        municipality_code,
+        department_name,
+        department_code,
+        population
     """
 
     return query_db(conn, query, [year])
