@@ -20,7 +20,7 @@ conn = psycopg2.connect(
 
 
 def query_db(conn: connection, query: str, values: List = None) -> List[Dict]:
-    
+
     if values is None:
         values = []
     try:
@@ -87,6 +87,7 @@ def get_municipalities_by_department(conn: connection, department_id: int):
 
     return query_db(conn, query, [department_id])
 
+
 def get_municipalities_population(conn: connection, department_id: int, year: int):
     query = """--sql
     SELECT 
@@ -99,3 +100,80 @@ def get_municipalities_population(conn: connection, department_id: int, year: in
     """
 
     return query_db(conn, query, [department_id, year])
+
+def get_interfamily_violence_cases(conn: connection, year: int):
+    query = """--sql
+    SELECT 
+        m.name as name,
+        m.code as code,
+        mph.total as population,
+        iv.count as violence_cases,
+        CASE
+            WHEN m.latitude = 'NaN' THEN NULL
+            ELSE m.latitude
+        END AS latitude,
+        CASE
+            WHEN m.longitude = 'NaN' THEN NULL
+            ELSE m.longitude
+        END AS longitude
+    FROM interfamilyViolence iv
+    JOIN municipalities m 
+        ON iv.municipality_id = m.code
+    JOIN municipalityPopulationHistory mph 
+        ON iv.municipality_id = mph.municipality_id AND iv.year = mph.year
+    WHERE iv.year = %s
+    """
+
+    return query_db(conn, query, [year])
+
+def get_suicide_cases(conn: connection, year:int):
+    query = """--sql
+    SELECT 
+        m.name as name,
+        m.code as code,
+        mph.total as population,
+        s.count as suicides,
+        CASE
+            WHEN m.latitude = 'NaN' THEN NULL
+            ELSE m.latitude
+        END AS latitude,
+        CASE
+            WHEN m.longitude = 'NaN' THEN NULL
+            ELSE m.longitude
+        END AS longitude
+    FROM suicides s
+    JOIN municipalities m 
+        ON s.municipality_id = m.code
+    JOIN municipalityPopulationHistory mph 
+        ON s.municipality_id = mph.municipality_id AND s.year = mph.year
+    WHERE s.year = %s
+    """
+
+    return query_db(conn, query, [year])
+
+def get_suicide_attempts(conn: connection, year:int):
+    query = """--sql
+    SELECT 
+        m.name as name,
+        m.code as code,
+        mph.total as population,
+        sum(sa.count) as suicide_attempts,
+        CASE
+            WHEN m.latitude = 'NaN' THEN NULL
+            ELSE m.latitude
+        END AS latitude,
+        CASE
+            WHEN m.longitude = 'NaN' THEN NULL
+            ELSE m.longitude
+        END AS longitude
+    FROM suicideAttempts sa
+    JOIN municipalities m 
+        ON sa.municipality_id = m.code
+    JOIN municipalityPopulationHistory mph 
+        ON sa.municipality_id = mph.municipality_id AND sa.year = mph.year
+    WHERE sa.year = 2016
+    GROUP BY 
+        name, code, population
+    """
+
+    return query_db(conn, query, [year])

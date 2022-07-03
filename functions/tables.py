@@ -130,6 +130,8 @@ class MunicipalityPopulationHistory(BaseTable):
 
 
 class InterfamilyViolence(BaseTable):
+    name = "InterfamilyViolence"
+
     create_statement: str = """--sql
     CREATE TABLE IF NOT EXISTS interfamilyViolence (
         id SERIAL PRIMARY KEY,
@@ -141,9 +143,9 @@ class InterfamilyViolence(BaseTable):
 
     insert_statement: str = """--sql
     INSERT INTO interfamilyViolence (
-        year, count
+        year, count, municipality_id
     )
-    VALUES (%s, %s)
+    VALUES (%s, %s, %s)
     """
 
     def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -151,6 +153,8 @@ class InterfamilyViolence(BaseTable):
 
 
 class Suicides(BaseTable):
+    name = "Suicides"
+
     create_statement: str = """--sql
     CREATE TABLE IF NOT EXISTS suicides (
         id SERIAL PRIMARY KEY,
@@ -162,20 +166,23 @@ class Suicides(BaseTable):
 
     insert_statement: str = """--sql
     INSERT INTO suicides (
-        year, count
+        year, count, municipality_id
     )
-    VALUES (%s, %s)
+    VALUES (%s, %s, %s)
     """
 
     def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
-        return df[["YEAR", "CODE_MUNICIPIO", "SUI_COUNTER"]]
+        return df[["YEAR", "SUI_COUNTER", "CODE_MUNICIPIO"]]
 
 
 class SuicideAttempts(BaseTable):
+    name = "SuicideAttempts"
+
     create_statement: str = """--sql
     CREATE TABLE IF NOT EXISTS suicideAttempts (
         id SERIAL PRIMARY KEY,
         year INTEGER,
+        week INTEGER,
         count INTEGER,
         municipality_id INTEGER references municipalities(code)
     )
@@ -183,9 +190,9 @@ class SuicideAttempts(BaseTable):
 
     insert_statement: str = """--sql
     INSERT INTO suicideAttempts (
-        year, count
+        year, week, count, municipality_id
     )
-    VALUES (%s, %s)
+    VALUES (%s, %s, %s, %s)
     """
 
     def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
