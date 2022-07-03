@@ -70,6 +70,9 @@ def handler(event, context):
                 table.create_table(cur, conn)
                 table.insert_data(df, cur, conn)
     
-    print("Data ingestion succesfull")
+            print("Data ingestion succesfull")
+        else:
+            print("No tables associated to file found by prefix")
+
 
     return {"status": 200}

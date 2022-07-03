@@ -89,8 +89,8 @@ class Municipalities(BaseTable):
     CREATE TABLE IF NOT EXISTS municipalities (
         code INTEGER PRIMARY KEY,
         name VARCHAR(30) NOT NULL,
-        latitude double,
-        longitude double,
+        latitude NUMERIC,
+        longitude NUMERIC,
         department_id INTEGER REFERENCES departments(code)
     )
     """
@@ -103,7 +103,7 @@ class Municipalities(BaseTable):
     """
 
     def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
-        return df
+        return df[["COD_MUNICIPIO","MPNOM","LATITUD","LONGITUD","DP"]]
 
 
 class MunicipalityPopulationHistory(BaseTable):

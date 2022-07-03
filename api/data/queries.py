@@ -20,6 +20,7 @@ conn = psycopg2.connect(
 
 
 def query_db(conn: connection, query: str, values: List = None) -> List[Dict]:
+    
     if values is None:
         values = []
     try:
@@ -28,8 +29,8 @@ def query_db(conn: connection, query: str, values: List = None) -> List[Dict]:
         resultset = cursor.fetchall()
         conn.commit()
     except:
-        resultset = []
         conn.rollback()
+        raise
 
     return [dict(row) for row in resultset]
 
@@ -69,11 +70,19 @@ def get_departments_population(conn: connection, year: int):
 
 def get_municipalities_by_department(conn: connection, department_id: int):
     query = """--sql
-    SELECT
-        m.name,
-        m.code,
-    FROM municipalities m
-    WHERE m.department_id = %s
+    SELECT 
+        name,
+        code,
+        CASE
+            WHEN latitude = 'NaN' THEN NULL
+            ELSE latitude
+        END AS lat,
+        CASE
+            WHEN longitude = 'NaN' THEN NULL
+            ELSE longitude
+        END AS lon
+    FROM municipalities
+    WHERE department_id = %s 
     """
 
     return query_db(conn, query, [department_id])

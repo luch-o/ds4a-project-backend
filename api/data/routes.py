@@ -40,6 +40,9 @@ async def departments_population(
 
 @router.get("/municipalities", tags=["municipalities"])
 async def municipalities(department_id: int = Query(title="Department code")):
+    """
+    Return a list of municipalities belonging to a given department
+    """
     return {"data": get_municipalities_by_department(conn, department_id)}
 
 
@@ -51,6 +54,7 @@ async def municipalities_population(
     )
 ):
     return {
-        "message": "Endpoint to return the population of each municipality in a given year",
+        "message": "NOT IMPLEMENTED",
         "year": year,
+        "department_id": department_id,
     }
