@@ -86,3 +86,16 @@ def get_municipalities_by_department(conn: connection, department_id: int):
     """
 
     return query_db(conn, query, [department_id])
+
+def get_municipalities_population(conn: connection, department_id: int, year: int):
+    query = """--sql
+    SELECT 
+        m.name as name,
+        m.code as code,
+        mph.total as population
+    FROM municipalities m
+    JOIN municipalityPopulationHistory mph ON m.code = mph.municipality_id
+    WHERE m.department_id = %s AND mph.year = %s 
+    """
+
+    return query_db(conn, query, [department_id, year])

@@ -135,6 +135,7 @@ class InterfamilyViolence(BaseTable):
         id SERIAL PRIMARY KEY,
         year INTEGER,
         count INTEGER,
+        municipality_id INTEGER references municipalities(code)
     )
     """
 
@@ -155,6 +156,7 @@ class Suicides(BaseTable):
         id SERIAL PRIMARY KEY,
         year INTEGER,
         count INTEGER,
+        municipality_id INTEGER references municipalities(code)
     )
     """
 
@@ -175,6 +177,7 @@ class SuicideAttempts(BaseTable):
         id SERIAL PRIMARY KEY,
         year INTEGER,
         count INTEGER,
+        municipality_id INTEGER references municipalities(code)
     )
     """
 

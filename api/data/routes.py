@@ -5,15 +5,16 @@ from api.data.queries import (
     list_departments,
     get_departments_population,
     get_municipalities_by_department,
+    get_municipalities_population
 )
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", tags=["root"])
 async def root():
     """
-    Returns list of public tables in the database
+    Development endpoint. Returns list of public tables in the database
     """
     return {"tables": get_tables(conn)}
 
@@ -46,15 +47,14 @@ async def municipalities(department_id: int = Query(title="Department code")):
     return {"data": get_municipalities_by_department(conn, department_id)}
 
 
-@router.get("/municipalities_population")
+@router.get("/municipalities_population", tags=["municipalities"])
 async def municipalities_population(
     department_id: int = Query(title="Department code"),
     year: int = Query(
         title="The year to get departmets population from", ge=2016, le=2022
     )
 ):
-    return {
-        "message": "NOT IMPLEMENTED",
-        "year": year,
-        "department_id": department_id,
-    }
+    """
+    Returns the population of the municipalities in a department for a given year
+    """
+    return {"data": get_municipalities_population(conn, department_id, year) }
