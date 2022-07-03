@@ -23,6 +23,8 @@ provider:
         - Effect: Allow
           Resource: !Ref RDSSecret
           Action: secretsmanager:GetSecretValue
+  httpApi:
+    cors: true
 
 package:
   patterns:
@@ -31,21 +33,21 @@ package:
 
 layers:
   pandas:
-    path: src/libs/pandas
+    path: libs/pandas
     package:
       patterns: 
         - "**/**"
     description: "Includes pandas and pyarrow"
 
   database:
-    path: src/libs/database
+    path: libs/database
     package:
       patterns: 
         - "**/**"
     description: "Includes psycopg2"
   
   fastapi:
-    path: src/libs/fastapi
+    path: libs/fastapi
     package:
       patterns:
         - "**/**"
@@ -85,6 +87,7 @@ resources:
       Type: AWS::RDS::DBInstance
       Properties:
         AllocatedStorage: 20
+        StorageType: gp2
         DBInstanceClass: db.t4g.micro
         Engine: postgres
         DBName: project
@@ -106,11 +109,11 @@ resources:
 
 functions:
   parquetize:
-    handler: src/parquetize.handler
+    handler: functions/parquetize.handler
     timeout: 900 # 15 min, max timeout
     package:
       patterns:
-        - src/parquetize.py
+        - functions/parquetize.py
     layers:
       - !Ref PandasLambdaLayer
     events:
@@ -122,12 +125,12 @@ functions:
             - suffix: .csv
   
   ingest:
-    handler: src/ingest.handler
+    handler: functions/ingest.handler
     timeout: 900 # 15 min, max timeout
     package:
       patterns:
-        - src/ingest.py
-        - src/tables.py
+        - functions/ingest.py
+        - functions/tables.py
     layers:
       - !Ref PandasLambdaLayer
       - !Ref DatabaseLambdaLayer
@@ -142,12 +145,12 @@ functions:
             - suffix: .parquet
 
   data-api:
-    handler: src/api.main.handler
-    timeout: 30
+    handler: api.data.main.handler
+    timeout: 29
     package:
       patterns:
-        - src/api/*
-        - src/__init__.py
+        - api/data/*
+        - api/__init__.py
     layers:
       - !Ref FastapiLambdaLayer
       - !Ref DatabaseLambdaLayer

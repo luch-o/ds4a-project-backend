@@ -113,7 +113,4 @@ node_modules
 .idea/
 
 # lambda dependencies
-src/libs
-
-# data files
-data/
+libs/
