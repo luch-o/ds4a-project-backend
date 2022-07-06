@@ -5,6 +5,9 @@ from psycopg2.extensions import cursor, connection
 
 
 class BaseTable:
+    """
+    Base class to define common behaviors and attributes that all tables have
+    """
     name: str
     create_statement: str
     insert_statement: str
@@ -15,7 +18,9 @@ class BaseTable:
 
     @classmethod
     def create_table(cls, cur: cursor, conn: connection):
-
+        """
+        Create table using the class create statement
+        """
         try:
             cur.execute(cls.create_statement)
             conn.commit()
@@ -26,6 +31,9 @@ class BaseTable:
 
     @classmethod
     def insert_data(cls, df: pd.DataFrame, cur: cursor, conn: connection):
+        """
+        Ingest data into the table
+        """
         data = cls.prepare_data(df)
         rows = [list(row) for row in data.itertuples(index=False)]
 

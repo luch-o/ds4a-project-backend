@@ -20,7 +20,10 @@ conn = psycopg2.connect(
 
 
 def query_db(conn: connection, query: str, values: List = None) -> List[Dict]:
-
+    """
+    Generic function to query the database and return the records with
+    python core datatypes
+    """
     if values is None:
         values = []
     try:
@@ -36,6 +39,9 @@ def query_db(conn: connection, query: str, values: List = None) -> List[Dict]:
 
 
 def get_tables(conn: connection) -> List[Dict[str, str]]:
+    """
+    Debug query to list public tables in the database
+    """
     query = """--sql
     SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
@@ -45,6 +51,9 @@ def get_tables(conn: connection) -> List[Dict[str, str]]:
 
 
 def list_departments(conn: connection) -> List[Dict[str, Union[str, int]]]:
+    """
+    Query the list of departments
+    """
     query = """--sql
     SELECT code, name FROM departments
     """
@@ -53,6 +62,9 @@ def list_departments(conn: connection) -> List[Dict[str, Union[str, int]]]:
 
 
 def get_departments_population(conn: connection, year: int):
+    """
+    Query the population of each department in a given year
+    """
     query = """--sql
     SELECT 
         d.code as code,
@@ -69,6 +81,9 @@ def get_departments_population(conn: connection, year: int):
 
 
 def get_municipalities_by_department(conn: connection, department_id: int):
+    """
+    Query the list of municipalities that belong to a given department
+    """
     query = """--sql
     SELECT 
         name,
@@ -89,6 +104,10 @@ def get_municipalities_by_department(conn: connection, department_id: int):
 
 
 def get_municipalities_population(conn: connection, department_id: int, year: int):
+    """
+    Get the population for a given year of the municipalities that belong to a 
+    given department
+    """
     query = """--sql
     SELECT 
         m.name as name,
@@ -102,6 +121,10 @@ def get_municipalities_population(conn: connection, department_id: int, year: in
     return query_db(conn, query, [department_id, year])
 
 def get_interfamily_violence_cases(conn: connection, year: int):
+    """
+    Query the number of interfamily violence cases that took place in each 
+    municipality for a given year
+    """
     query = """--sql
     SELECT 
         m.name as municipality_name,
@@ -131,6 +154,9 @@ def get_interfamily_violence_cases(conn: connection, year: int):
     return query_db(conn, query, [year])
 
 def get_suicide_cases(conn: connection, year:int):
+    """
+    Query the suicide cases for each municipality for a given year
+    """
     query = """--sql
     SELECT 
         m.name as municipality_name,
@@ -160,6 +186,9 @@ def get_suicide_cases(conn: connection, year:int):
     return query_db(conn, query, [year])
 
 def get_suicide_attempts(conn: connection, year:int):
+    """
+    Query the suicide attempts for each municipality for a given year
+    """
     query = """--sql
     SELECT 
         m.name as municipality_name,

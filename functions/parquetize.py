@@ -21,6 +21,12 @@ s3 = boto3.client("s3")
 
 
 def handler(event, context):
+    """
+    Entry point for the lambda function.
+
+    Load csv file, store ir as parquet in a different location and delete the
+    original csv file
+    """
     for record in event["Records"]:
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]

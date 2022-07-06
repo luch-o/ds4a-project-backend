@@ -31,6 +31,9 @@ TABLES_DICT: Dict[str, List[BaseTable]] = {
 # functions
 
 def get_secret(aws: boto3.Session, secret_name: str) -> Dict[str, str]:
+    """
+    Retrive secret from secrets manager
+    """
     sm = aws.client("secretsmanager")
     response = sm.get_secret_value(SecretId=secret_name)
     secret = response["SecretString"]
@@ -51,6 +54,11 @@ cur = conn.cursor()
 
 # handler
 def handler(event, context):
+    """
+    Entry point for the lambda function.
+
+    Identify table corresponding to file, create it and ingest data from the file to it
+    """
     for record in event["Records"]:
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]
