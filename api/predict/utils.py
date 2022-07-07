@@ -12,9 +12,10 @@ from scipy.special import erf
 BUCKET = "ds4a-co6-t107-datalake"
 aws = boto3.Session()
 s3 = aws.client("s3")
-models = {} # init empty, lazy loading of models
+models = {}  # init empty, lazy loading of models
 
 # load functions
+
 
 def load_model(var: str):
     key = f"assets/models/{var}-brm.joblib"
@@ -29,13 +30,22 @@ def load_df(key: str):
     obj = s3.get_object(Bucket=BUCKET, Key=key).get("Body")
     return pd.read_csv(obj)
 
+
 # prediction functions
 
+
 def compute_probs_from_scores(scores):
+    if len(scores) == 1:
+        XMIN = np.sqrt(2) / 2
+        XMAX = 1.0
+        probs = ((scores - XMIN) / (XMAX - XMIN)).clip(0, 1.0).ravel()
+        return probs
     pre_erf_scores = scores
     std = np.std(scores)
     if len(scores) >= 2 and std > 0.0:
         pre_erf_scores = (scores - np.mean(scores)) / (np.std(scores) * np.sqrt(2))
+    else:
+        pre_erf_scores /= np.sqrt(2)
     erf_score = erf(pre_erf_scores)
     probs = erf_score.clip(0, 1.0).ravel()
     return probs
@@ -56,21 +66,25 @@ def compute_prob(dpto, municipio, gender, var_name, var_value, model_name="brm")
     """
     # load template dataframe with right colnames and zero values
     df = load_df(f"assets/templates/{var_name}_{model_name}_TEMPLATE.csv").head(10)
-    
+
     if var_name not in models:
         models[var_name] = load_model(var_name)
-    
+
     model = models[var_name]
     # Setup 1 on dpto municipio gender var_name var_value
-    df.loc[
-        0,
-        [
-            f"DPTO_{dpto}",
-            f"MUNICIPIO_{municipio}",
-            f"GENDER_{gender}",
-            f"{var_name}_{var_value}",
-        ],
-    ] = 1
+    record_features = [
+        f"DPTO_{dpto}",
+        f"MUNICIPIO_{municipio}",
+        f"GENDER_{gender}",
+        f"{var_name}_{var_value}",
+    ]
+
+    for feature in record_features:
+        if feature not in df.columns:
+            variable, value = feature.split("_")
+            raise ValueError(f"{value=} for {variable=} not considered in the model")
+
+    df.loc[0, record_features] = 1
 
     # compute the probability
     prob = -1.0

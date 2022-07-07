@@ -14,6 +14,7 @@ VAR_NAMES = [
     "vulnerability_factor",
 ]
 
+
 class ModelInput(BaseModel):
     department: str
     municipality: str
@@ -28,32 +29,33 @@ class ModelInput(BaseModel):
 @router.post("/")
 def predict(record: ModelInput):
     """
-    Return a list of predicted probabilities depending on the models used and 
+    Return a list of predicted probabilities depending on the models used and
     a global probability computed as the mean of the probailities
     """
     record_dict = record.dict()
     department = unidecode(record.department.upper())
     municipality = unidecode(record.municipality.upper())
     gender = record.gender.upper()
-    
-    probs = [
-        {
-            "var": var,
-            "prob": compute_prob(department, municipality, gender, var.upper(), record_dict[var])
-        }
-        for var in VAR_NAMES
-        if record_dict.get(var) is not None
-    ]
+
+    try:
+        probs = [
+            {
+                "var": var,
+                "prob": compute_prob(
+                    department, municipality, gender, var.upper(), record_dict[var]
+                ),
+            }
+            for var in VAR_NAMES
+            if record_dict.get(var) is not None
+        ]
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
     if not probs:
         raise HTTPException(
-            status_code=422, 
-            detail=f"At least one of {VAR_NAMES} must be specified"
+            status_code=400, detail=f"At least one of {VAR_NAMES} must be specified"
         )
-    
-    global_prob = sum([p["prob"] for p in probs]) * len(probs)
 
-    return {
-        "probabilities": probs,
-        "global": global_prob 
-    }
+    global_prob = sum([p["prob"] for p in probs]) / len(probs)
+
+    return {"probabilities": probs, "global": global_prob}
