@@ -25,18 +25,31 @@ provider:
           Action: secretsmanager:GetSecretValue
   httpApi:
     cors: true
+  ecr:
+    scanOnPush: true
+    images:
+      predict-image:
+        path: api/predict/
+        file: Dockerfile
 
 package:
   patterns:
-  - '!**'
+    - "!**/**"
   individually: true
-
+  
 layers:
   pandas:
     path: libs/pandas
     package:
-      patterns: 
+      patterns:
         - "**/**"
+        - "!**/*.egg-info/"
+        - "!**/*.dist-info/"
+        - "!**/*.pyc"
+        - "!**/*.pyo"
+        - "!**/__pycache__/"
+        - "!**/docs"
+        - "!**/tests"
     description: "Includes pandas and pyarrow"
 
   database:
@@ -44,6 +57,13 @@ layers:
     package:
       patterns: 
         - "**/**"
+        - "!**/*.egg-info/"
+        - "!**/*.dist-info/"
+        - "!**/*.pyc"
+        - "!**/*.pyo"
+        - "!**/__pycache__/"
+        - "!**/docs"
+        - "!**/tests"
     description: "Includes psycopg2"
   
   fastapi:
@@ -51,6 +71,13 @@ layers:
     package:
       patterns:
         - "**/**"
+        - "!**/*.egg-info/"
+        - "!**/*.dist-info/"
+        - "!**/*.pyc"
+        - "!**/*.pyo"
+        - "!**/__pycache__/"
+        - "!**/docs"
+        - "!**/tests"
     description: "FastAPI dependencies"
 
 resources:
@@ -160,3 +187,13 @@ functions:
       - httpApi:
           method: any
           path: /data/{proxy+}
+
+  predict-api:
+    image: predict-image
+    memorySize: 2048
+    timeout: 29
+    events:
+      - httpApi:
+          method: any
+          path: /predict/{proxy+}
+          
