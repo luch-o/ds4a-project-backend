@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Union
 from utils import compute_prob
+from unidecode import unidecode
 
 router = APIRouter()
 
@@ -9,8 +10,7 @@ VAR_NAMES = [
     "age_group",
     "cause",
     "marital_status",
-    "racial_origin",
-    "scolarship",
+    "scholarship",
     "vulnerability_factor",
 ]
 
@@ -21,8 +21,7 @@ class ModelInput(BaseModel):
     age_group: Union[str, None] = None
     cause: Union[str, None] = None
     marital_status: Union[str, None] = None
-    racial_origin: Union[str, None] = None
-    scolarship: Union[str, None] = None
+    scholarship: Union[str, None] = None
     vulnerability_factor: Union[str, None] = None
 
 
@@ -30,11 +29,11 @@ class ModelInput(BaseModel):
 def predict(record: ModelInput):
     """
     Return a list of predicted probabilities depending on the models used and 
-    a global probability computed as the harmonic mean of the probailities
+    a global probability computed as the mean of the probailities
     """
     record_dict = record.dict()
-    department = record.department.upper()
-    municipality = record.municipality.upper()
+    department = unidecode(record.department.upper())
+    municipality = unidecode(record.municipality.upper())
     gender = record.gender.upper()
     
     probs = [
@@ -52,9 +51,9 @@ def predict(record: ModelInput):
             detail=f"At least one of {VAR_NAMES} must be specified"
         )
     
-    global_prob = sum([1/p["prob"] for p in probs]) * len(probs)
+    global_prob = sum([p["prob"] for p in probs]) * len(probs)
 
     return {
         "probabilities": probs,
-        "global": global_prob
+        "global": global_prob 
     }
