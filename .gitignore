@@ -117,3 +117,6 @@ libs/
 
 # prediction service files
 assets/
+
+# testing notebooks
+notebooks/
