@@ -26,7 +26,7 @@ $ pip install -t libs/fastapi/python -r fastapi_requirements.txt
   - Two microservices written in FastAPI deployed using AWS Lambda and API Gateway:
     - data: to access the data stored in the database.
     - predict: to make inference on the trained model.
-  - Services used in data ingestion pipeline:
+  - Event driven data ingestion pipeline using:
     - Amazon S3 as datalake.
     - AWS Lambda for compute.
     - PostgreSQL database hosted in RDS.
