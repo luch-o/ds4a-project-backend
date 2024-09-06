@@ -21,3 +21,19 @@ $ pip install -t libs/pandas/python -r pandas_requirements.txt
 $ pip install -t libs/database/python -r database_requirements.txt
 $ pip install -t libs/fastapi/python -r fastapi_requirements.txt
 ```
+## Architecture
+
+  - Two microservices written in FastAPI deployed using AWS Lambda and API Gateway:
+    - data: to access the data stored in the database.
+    - predict: to make inference on the trained model.
+  - Services used in data ingestion pipeline:
+    - Amazon S3 as datalake.
+    - AWS Lambda for compute.
+    - PostgreSQL database hosted in RDS.
+
+Data pipeline workflow:
+  1. Admin uploads preprocessed csv file.
+  2. Parquetize funcion converts the file to parquet.
+  3. Ingest function creates the table and inserts data.
+    
+![image](https://github.com/user-attachments/assets/917af916-d911-45af-89fa-53f87593c318)
